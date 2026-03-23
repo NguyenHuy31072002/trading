@@ -7,21 +7,21 @@ from cli.models import AnalystType
 
 console = Console()
 
-TICKER_INPUT_EXAMPLES = "Examples: SPY, CNC.TO, 7203.T, 0700.HK"
+TICKER_INPUT_EXAMPLES = "Ví dụ: SPY, VNM.VN, FPT.VN, 0700.HK"
 
 ANALYST_ORDER = [
-    ("Market Analyst", AnalystType.MARKET),
-    ("Social Media Analyst", AnalystType.SOCIAL),
-    ("News Analyst", AnalystType.NEWS),
-    ("Fundamentals Analyst", AnalystType.FUNDAMENTALS),
+    ("Phân tích Thị trường", AnalystType.MARKET),
+    ("Phân tích Mạng xã hội", AnalystType.SOCIAL),
+    ("Phân tích Tin tức", AnalystType.NEWS),
+    ("Phân tích Cơ bản", AnalystType.FUNDAMENTALS),
 ]
 
 
 def get_ticker() -> str:
     """Prompt the user to enter a ticker symbol."""
     ticker = questionary.text(
-        f"Enter the exact ticker symbol to analyze ({TICKER_INPUT_EXAMPLES}):",
-        validate=lambda x: len(x.strip()) > 0 or "Please enter a valid ticker symbol.",
+        f"Nhập chính xác mã cổ phiếu cần phân tích ({TICKER_INPUT_EXAMPLES}):",
+        validate=lambda x: len(x.strip()) > 0 or "Vui lòng nhập mã cổ phiếu hợp lệ.",
         style=questionary.Style(
             [
                 ("text", "fg:green"),
@@ -31,7 +31,7 @@ def get_ticker() -> str:
     ).ask()
 
     if not ticker:
-        console.print("\n[red]No ticker symbol provided. Exiting...[/red]")
+        console.print("\n[red]Không có mã cổ phiếu. Đang thoát...[/red]")
         exit(1)
 
     return normalize_ticker_symbol(ticker)
@@ -57,9 +57,9 @@ def get_analysis_date() -> str:
             return False
 
     date = questionary.text(
-        "Enter the analysis date (YYYY-MM-DD):",
+        "Nhập ngày phân tích (YYYY-MM-DD):",
         validate=lambda x: validate_date(x.strip())
-        or "Please enter a valid date in YYYY-MM-DD format.",
+        or "Vui lòng nhập ngày hợp lệ theo định dạng YYYY-MM-DD.",
         style=questionary.Style(
             [
                 ("text", "fg:green"),
@@ -69,7 +69,7 @@ def get_analysis_date() -> str:
     ).ask()
 
     if not date:
-        console.print("\n[red]No date provided. Exiting...[/red]")
+        console.print("\n[red]Không có ngày. Đang thoát...[/red]")
         exit(1)
 
     return date.strip()
@@ -78,12 +78,12 @@ def get_analysis_date() -> str:
 def select_analysts() -> List[AnalystType]:
     """Select analysts using an interactive checkbox."""
     choices = questionary.checkbox(
-        "Select Your [Analysts Team]:",
+        "Chọn [Đội Phân tích] của bạn:",
         choices=[
             questionary.Choice(display, value=value) for display, value in ANALYST_ORDER
         ],
-        instruction="\n- Press Space to select/unselect analysts\n- Press 'a' to select/unselect all\n- Press Enter when done",
-        validate=lambda x: len(x) > 0 or "You must select at least one analyst.",
+        instruction="\n- Nhấn Space để chọn/bỏ chọn\n- Nhấn 'a' để chọn/bỏ chọn tất cả\n- Nhấn Enter khi xong",
+        validate=lambda x: len(x) > 0 or "Bạn phải chọn ít nhất một nhà phân tích.",
         style=questionary.Style(
             [
                 ("checkbox-selected", "fg:green"),
@@ -95,7 +95,7 @@ def select_analysts() -> List[AnalystType]:
     ).ask()
 
     if not choices:
-        console.print("\n[red]No analysts selected. Exiting...[/red]")
+        console.print("\n[red]Không chọn nhà phân tích nào. Đang thoát...[/red]")
         exit(1)
 
     return choices
@@ -106,17 +106,17 @@ def select_research_depth() -> int:
 
     # Define research depth options with their corresponding values
     DEPTH_OPTIONS = [
-        ("Shallow - Quick research, few debate and strategy discussion rounds", 1),
-        ("Medium - Middle ground, moderate debate rounds and strategy discussion", 3),
-        ("Deep - Comprehensive research, in depth debate and strategy discussion", 5),
+        ("Nông - Nghiên cứu nhanh, ít vòng tranh luận và thảo luận chiến lược", 1),
+        ("Trung bình - Mức trung gian, số vòng tranh luận vừa phải", 3),
+        ("Sâu - Nghiên cứu toàn diện, tranh luận và thảo luận chiến lược chuyên sâu", 5),
     ]
 
     choice = questionary.select(
-        "Select Your [Research Depth]:",
+        "Chọn [Độ sâu Nghiên cứu]:",
         choices=[
             questionary.Choice(display, value=value) for display, value in DEPTH_OPTIONS
         ],
-        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        instruction="\n- Dùng phím mũi tên để di chuyển\n- Nhấn Enter để chọn",
         style=questionary.Style(
             [
                 ("selected", "fg:yellow noinherit"),
@@ -127,7 +127,7 @@ def select_research_depth() -> int:
     ).ask()
 
     if choice is None:
-        console.print("\n[red]No research depth selected. Exiting...[/red]")
+        console.print("\n[red]Chưa chọn độ sâu nghiên cứu. Đang thoát...[/red]")
         exit(1)
 
     return choice
@@ -174,12 +174,12 @@ def select_shallow_thinking_agent(provider) -> str:
     }
 
     choice = questionary.select(
-        "Select Your [Quick-Thinking LLM Engine]:",
+        "Chọn [LLM Tư duy Nhanh]:",
         choices=[
             questionary.Choice(display, value=value)
             for display, value in SHALLOW_AGENT_OPTIONS[provider.lower()]
         ],
-        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        instruction="\n- Dùng phím mũi tên để di chuyển\n- Nhấn Enter để chọn",
         style=questionary.Style(
             [
                 ("selected", "fg:magenta noinherit"),
@@ -191,7 +191,7 @@ def select_shallow_thinking_agent(provider) -> str:
 
     if choice is None:
         console.print(
-            "\n[red]No shallow thinking llm engine selected. Exiting...[/red]"
+            "\n[red]Chưa chọn LLM tư duy nhanh. Đang thoát...[/red]"
         )
         exit(1)
 
@@ -241,12 +241,12 @@ def select_deep_thinking_agent(provider) -> str:
     }
 
     choice = questionary.select(
-        "Select Your [Deep-Thinking LLM Engine]:",
+        "Chọn [LLM Tư duy Sâu]:",
         choices=[
             questionary.Choice(display, value=value)
             for display, value in DEEP_AGENT_OPTIONS[provider.lower()]
         ],
-        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        instruction="\n- Dùng phím mũi tên để di chuyển\n- Nhấn Enter để chọn",
         style=questionary.Style(
             [
                 ("selected", "fg:magenta noinherit"),
@@ -257,7 +257,7 @@ def select_deep_thinking_agent(provider) -> str:
     ).ask()
 
     if choice is None:
-        console.print("\n[red]No deep thinking llm engine selected. Exiting...[/red]")
+        console.print("\n[red]Chưa chọn LLM tư duy sâu. Đang thoát...[/red]")
         exit(1)
 
     return choice
@@ -275,12 +275,12 @@ def select_llm_provider() -> tuple[str, str]:
     ]
     
     choice = questionary.select(
-        "Select your LLM Provider:",
+        "Chọn Nhà cung cấp LLM:",
         choices=[
             questionary.Choice(display, value=(display, value))
             for display, value in BASE_URLS
         ],
-        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        instruction="\n- Dùng phím mũi tên để di chuyển\n- Nhấn Enter để chọn",
         style=questionary.Style(
             [
                 ("selected", "fg:magenta noinherit"),
@@ -291,11 +291,11 @@ def select_llm_provider() -> tuple[str, str]:
     ).ask()
     
     if choice is None:
-        console.print("\n[red]no OpenAI backend selected. Exiting...[/red]")
+        console.print("\n[red]Chưa chọn nhà cung cấp LLM. Đang thoát...[/red]")
         exit(1)
-    
+
     display_name, url = choice
-    print(f"You selected: {display_name}\tURL: {url}")
+    print(f"Bạn đã chọn: {display_name}\tURL: {url}")
 
     return display_name, url
 
@@ -303,12 +303,12 @@ def select_llm_provider() -> tuple[str, str]:
 def ask_openai_reasoning_effort() -> str:
     """Ask for OpenAI reasoning effort level."""
     choices = [
-        questionary.Choice("Medium (Default)", "medium"),
-        questionary.Choice("High (More thorough)", "high"),
-        questionary.Choice("Low (Faster)", "low"),
+        questionary.Choice("Trung bình (Mặc định)", "medium"),
+        questionary.Choice("Cao (Kỹ lưỡng hơn)", "high"),
+        questionary.Choice("Thấp (Nhanh hơn)", "low"),
     ]
     return questionary.select(
-        "Select Reasoning Effort:",
+        "Chọn Mức độ Suy luận:",
         choices=choices,
         style=questionary.Style([
             ("selected", "fg:cyan noinherit"),
@@ -324,11 +324,11 @@ def ask_anthropic_effort() -> str | None:
     Controls token usage and response thoroughness on Claude 4.5+ and 4.6 models.
     """
     return questionary.select(
-        "Select Effort Level:",
+        "Chọn Mức độ Nỗ lực:",
         choices=[
-            questionary.Choice("High (recommended)", "high"),
-            questionary.Choice("Medium (balanced)", "medium"),
-            questionary.Choice("Low (faster, cheaper)", "low"),
+            questionary.Choice("Cao (khuyến nghị)", "high"),
+            questionary.Choice("Trung bình (cân bằng)", "medium"),
+            questionary.Choice("Thấp (nhanh hơn, rẻ hơn)", "low"),
         ],
         style=questionary.Style([
             ("selected", "fg:cyan noinherit"),
@@ -345,10 +345,10 @@ def ask_gemini_thinking_config() -> str | None:
     Client maps to appropriate API param based on model series.
     """
     return questionary.select(
-        "Select Thinking Mode:",
+        "Chọn Chế độ Tư duy:",
         choices=[
-            questionary.Choice("Enable Thinking (recommended)", "high"),
-            questionary.Choice("Minimal/Disable Thinking", "minimal"),
+            questionary.Choice("Bật Tư duy (khuyến nghị)", "high"),
+            questionary.Choice("Tối thiểu/Tắt Tư duy", "minimal"),
         ],
         style=questionary.Style([
             ("selected", "fg:green noinherit"),

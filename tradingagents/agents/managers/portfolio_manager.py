@@ -50,7 +50,9 @@ def create_portfolio_manager(llm, memory):
 
 ---
 
-Be decisive and ground every conclusion in specific evidence from the analysts."""
+Be decisive and ground every conclusion in specific evidence from the analysts.
+
+IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt). Keep the rating keywords (Buy/Overweight/Hold/Underweight/Sell) in English."""
 
         response = llm.invoke(prompt)
 

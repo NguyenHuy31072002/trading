@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+.git
+.env
+node_modules
+web/frontend/node_modules
+web/frontend/dist
+results/
+reports/
+*.egg-info
+.venv
+uv.lock
+build/

@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0a0f1e;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+/* Markdown */
+.md-body h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; color: #f1f5f9; }
+.md-body h2 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #e2e8f0; }
+.md-body h3 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.25rem; color: #cbd5e1; }
+.md-body p { margin: 0.5rem 0; line-height: 1.7; color: #94a3b8; }
+.md-body ul, .md-body ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+.md-body li { margin: 0.25rem 0; color: #94a3b8; }
+.md-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+.md-body th { background: rgba(59,130,246,0.15); padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; border: 1px solid #1e3a5f; color: #93c5fd; }
+.md-body td { padding: 0.5rem 0.75rem; border: 1px solid #1e293b; color: #94a3b8; }
+.md-body tr:nth-child(even) { background: rgba(30,41,59,0.5); }
+.md-body strong { color: #60a5fa; }
+.md-body code { background: #1e293b; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; color: #a5b4fc; }
+.md-body blockquote { border-left: 3px solid #3b82f6; padding-left: 1rem; color: #64748b; margin: 0.5rem 0; }
+
+@keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:.5} }
+.animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fadeUp .4s ease-out; }
+
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.shimmer { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }

@@ -40,7 +40,9 @@ Here are your past reflections on mistakes:
 
 Here is the debate:
 Debate History:
-{history}"""
+{history}
+
+IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt)."""
         response = llm.invoke(prompt)
 
         new_investment_debate_state = {
