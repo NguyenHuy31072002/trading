@@ -1,20 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
   TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare,
   Newspaper, PieChart, Users, Briefcase, Shield, Award,
-  ChevronDown, ChevronUp, RefreshCcw, Download
+  ChevronDown, ChevronUp, RefreshCcw, FileText, Loader2
 } from 'lucide-react'
+import MarketCharts from './charts/MarketCharts'
+import FinancialReportsCharts from './charts/FinancialReportsCharts'
+import FundamentalsCharts from './charts/FundamentalsCharts'
+import { exportReportToPdf } from '../utils/exportPdf'
 
 const SECTION_META = {
   market_report: { icon: BarChart3, color: 'blue', label: 'Phân tích Thị trường' },
-  sentiment_report: { icon: MessageSquare, color: 'violet', label: 'Tâm lý Mạng xã hội' },
+  financial_reports_report: { icon: MessageSquare, color: 'violet', label: 'Phân tích Báo cáo Tài chính' },
   news_report: { icon: Newspaper, color: 'amber', label: 'Phân tích Tin tức' },
   fundamentals_report: { icon: PieChart, color: 'emerald', label: 'Phân tích Cơ bản' },
   investment_plan: { icon: Users, color: 'purple', label: 'Quyết định Đội Nghiên cứu' },
   trader_plan: { icon: Briefcase, color: 'orange', label: 'Kế hoạch Giao dịch' },
   final_decision: { icon: Award, color: 'cyan', label: 'Quyết định Cuối cùng' },
+}
+
+const CHART_COMPONENTS = {
+  market_report: MarketCharts,
+  financial_reports_report: FinancialReportsCharts,
+  fundamentals_report: FundamentalsCharts,
 }
 
 function DecisionBadge({ decision }) {
@@ -44,13 +54,14 @@ function DecisionBadge({ decision }) {
   )
 }
 
-function ReportSection({ sectionKey, data }) {
+function ReportSection({ sectionKey, data, chartData }) {
   const [open, setOpen] = useState(sectionKey === 'final_decision')
   const meta = SECTION_META[sectionKey]
   if (!meta || !data) return null
 
   const Icon = meta.icon
   const isDecision = sectionKey === 'final_decision'
+  const ChartComponent = CHART_COMPONENTS[sectionKey]
 
   return (
     <div className={`bg-slate-900/60 border rounded-2xl overflow-hidden transition-all ${
@@ -80,6 +91,9 @@ function ReportSection({ sectionKey, data }) {
               {data.content}
             </ReactMarkdown>
           </div>
+          {ChartComponent && chartData && (
+            <ChartComponent chartData={chartData} />
+          )}
         </div>
       )}
     </div>
@@ -91,32 +105,64 @@ export default function ResultsView({ data, onNewAnalysis }) {
 
   const { decision, complete_report, ticker, date } = data
   const sections = complete_report || {}
+  const [chartData, setChartData] = useState(null)
+  const [exporting, setExporting] = useState(false)
 
-  const handleDownload = () => {
-    let md = `# Báo cáo Phân tích: ${ticker}\nNgày: ${date}\n\n`
-    for (const [, sec] of Object.entries(sections)) {
-      md += `## ${sec.title}\n\n${sec.content}\n\n---\n\n`
+  useEffect(() => {
+    // Use chart_data from WebSocket response if available
+    if (data.chart_data && Object.keys(data.chart_data).length > 0) {
+      setChartData(data.chart_data)
+      return
     }
-    const blob = new Blob([md], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${ticker}_${date}_report.md`
-    a.click()
-    URL.revokeObjectURL(url)
+    // Fallback: fetch from REST endpoint
+    if (!ticker) return
+    fetch(`/api/chart-data/${encodeURIComponent(ticker)}?date=${encodeURIComponent(date)}`)
+      .then(r => r.json())
+      .then(setChartData)
+      .catch(() => setChartData(null))
+  }, [ticker, date, data.chart_data])
+
+  const handleExportPdf = async () => {
+    setExporting(true)
+    try {
+      await exportReportToPdf('report-content', ticker, date)
+    } finally {
+      setExporting(false)
+    }
   }
+
+  // Map section keys to their chart data subsets
+  const sectionChartData = chartData ? {
+    market_report: { price: chartData.price, rsi: chartData.rsi, macd: chartData.macd },
+    financial_reports_report: { income: chartData.income, cashflow: chartData.cashflow },
+    fundamentals_report: { balance_sheet: chartData.balance_sheet, ratios: chartData.ratios },
+  } : {}
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 fade-up">
-      {/* Decision Hero */}
-      <div className="text-center mb-12">
-        <p className="text-sm text-slate-400 mb-2 font-mono">{ticker} &mdash; {date}</p>
-        <h2 className="text-3xl font-extrabold text-white mb-6">Kết quả Phân tích</h2>
-        <DecisionBadge decision={decision} />
+      <div id="report-content">
+        {/* Decision Hero */}
+        <div className="text-center mb-12">
+          <p className="text-sm text-slate-400 mb-2 font-mono">{ticker} &mdash; {date}</p>
+          <h2 className="text-3xl font-extrabold text-white mb-6">Kết quả Phân tích</h2>
+          <DecisionBadge decision={decision} />
+        </div>
+
+        {/* Report Sections */}
+        <div className="space-y-3">
+          {Object.entries(sections).map(([key, sec]) => (
+            <ReportSection
+              key={key}
+              sectionKey={key}
+              data={sec}
+              chartData={sectionChartData[key] || null}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center gap-3 mb-10">
+      <div className="flex justify-center gap-3 mt-10">
         <button
           onClick={onNewAnalysis}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-medium transition cursor-pointer"
@@ -125,19 +171,13 @@ export default function ResultsView({ data, onNewAnalysis }) {
           Phân tích mới
         </button>
         <button
-          onClick={handleDownload}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition cursor-pointer"
+          onClick={handleExportPdf}
+          disabled={exporting}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition cursor-pointer disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          Tải báo cáo
+          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+          {exporting ? 'Đang xuất...' : 'Tải PDF'}
         </button>
-      </div>
-
-      {/* Report Sections */}
-      <div className="space-y-3">
-        {Object.entries(sections).map(([key, sec]) => (
-          <ReportSection key={key} sectionKey={key} data={sec} />
-        ))}
       </div>
     </div>
   )

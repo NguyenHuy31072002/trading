@@ -94,15 +94,15 @@ DEEP_MODELS = {
 
 ANALYSTS = [
     {"id": "market", "name": "Phân tích Thị trường", "icon": "📈"},
-    {"id": "social", "name": "Phân tích Mạng xã hội", "icon": "💬"},
+    {"id": "financial_reports", "name": "Phân tích Báo cáo Tài chính", "icon": "📑"},
     {"id": "news", "name": "Phân tích Tin tức", "icon": "📰"},
     {"id": "fundamentals", "name": "Phân tích Cơ bản", "icon": "📊"},
 ]
 
 DEPTH_OPTIONS = [
-    {"id": 1, "name": "Nông", "desc": "Nghiên cứu nhanh, ít vòng tranh luận"},
-    {"id": 3, "name": "Trung bình", "desc": "Mức trung gian, vòng tranh luận vừa phải"},
-    {"id": 5, "name": "Sâu", "desc": "Nghiên cứu toàn diện, tranh luận chuyên sâu"},
+    {"id": 1, "name": "Thấp", "desc": "Nghiên cứu nhanh, ít vòng tranh luận"},
+    {"id": 3, "name": "Cao", "desc": "Nghiên cứu kỹ lưỡng, nhiều vòng tranh luận"},
+    {"id": 5, "name": "Chuyên sâu", "desc": "Nghiên cứu toàn diện, tranh luận chuyên sâu"},
 ]
 
 
@@ -110,23 +110,23 @@ DEPTH_OPTIONS = [
 # Agent status constants
 # ---------------------------------------------------------------------------
 
-ANALYST_ORDER = ["market", "social", "news", "fundamentals"]
+ANALYST_ORDER = ["market", "financial_reports", "news", "fundamentals"]
 ANALYST_AGENT_NAMES = {
     "market": "Market Analyst",
-    "social": "Social Analyst",
+    "financial_reports": "Financial_reports Analyst",
     "news": "News Analyst",
     "fundamentals": "Fundamentals Analyst",
 }
 ANALYST_REPORT_MAP = {
     "market": "market_report",
-    "social": "sentiment_report",
+    "financial_reports": "financial_reports_report",
     "news": "news_report",
     "fundamentals": "fundamentals_report",
 }
 
 AGENT_DISPLAY_NAMES = {
     "Market Analyst": "Phân tích Thị trường",
-    "Social Analyst": "Phân tích Mạng xã hội",
+    "Financial_reports Analyst": "Phân tích Báo cáo Tài chính",
     "News Analyst": "Phân tích Tin tức",
     "Fundamentals Analyst": "Phân tích Cơ bản",
     "Bull Researcher": "Nhà nghiên cứu Tăng giá",
@@ -138,6 +138,18 @@ AGENT_DISPLAY_NAMES = {
     "Conservative Analyst": "Phân tích Thận trọng",
     "Portfolio Manager": "Quản lý Danh mục",
 }
+
+def _safe_num(val) -> float:
+    """Convert a value to float safely, returning 0 for None/NaN."""
+    import math
+    if val is None:
+        return 0
+    try:
+        f = float(val)
+        return 0 if math.isnan(f) else round(f, 2)
+    except (ValueError, TypeError):
+        return 0
+
 
 TEAM_NAMES = {
     "analyst": "Đội Phân tích",
@@ -183,6 +195,156 @@ async def get_config():
     }
 
 
+@app.get("/api/chart-data/{ticker}")
+async def get_chart_data(ticker: str, date: str = None):
+    """Fetch structured chart data for a ticker from yfinance."""
+    import yfinance as yf
+    import pandas as pd
+    from datetime import datetime, timedelta
+
+    ticker = ticker.strip().upper()
+    analysis_date = date or datetime.now().strftime("%Y-%m-%d")
+    analysis_dt = datetime.strptime(analysis_date, "%Y-%m-%d")
+
+    result = {}
+
+    try:
+        yf_ticker = yf.Ticker(ticker)
+
+        # --- Price data (last 6 months) ---
+        price_start = (analysis_dt - timedelta(days=180)).strftime("%Y-%m-%d")
+        hist = yf_ticker.history(start=price_start, end=analysis_date)
+        if not hist.empty:
+            if hist.index.tz is not None:
+                hist.index = hist.index.tz_localize(None)
+            price_records = []
+            for idx, row in hist.iterrows():
+                price_records.append({
+                    "date": idx.strftime("%Y-%m-%d"),
+                    "open": round(float(row.get("Open", 0)), 2),
+                    "high": round(float(row.get("High", 0)), 2),
+                    "low": round(float(row.get("Low", 0)), 2),
+                    "close": round(float(row.get("Close", 0)), 2),
+                    "volume": int(row.get("Volume", 0)),
+                })
+            result["price"] = price_records
+
+            # --- Technical indicators from stockstats ---
+            from stockstats import wrap as stockstats_wrap
+            df = hist.reset_index().copy()
+            df.columns = [c.lower() for c in df.columns]
+            if "date" not in df.columns and df.index.name == "date":
+                df = df.reset_index()
+            ss = stockstats_wrap(df)
+
+            # RSI
+            try:
+                ss["rsi"]
+                rsi_data = []
+                for _, row in ss.iterrows():
+                    d = row.get("date", row.name)
+                    if hasattr(d, "strftime"):
+                        d = d.strftime("%Y-%m-%d")
+                    val = row.get("rsi")
+                    if pd.notna(val):
+                        rsi_data.append({"date": str(d), "value": round(float(val), 2)})
+                result["rsi"] = rsi_data
+            except Exception:
+                pass
+
+            # MACD
+            try:
+                ss["macd"]
+                ss["macds"]
+                ss["macdh"]
+                macd_data = []
+                for _, row in ss.iterrows():
+                    d = row.get("date", row.name)
+                    if hasattr(d, "strftime"):
+                        d = d.strftime("%Y-%m-%d")
+                    m, s, h = row.get("macd"), row.get("macds"), row.get("macdh")
+                    if pd.notna(m):
+                        macd_data.append({
+                            "date": str(d),
+                            "macd": round(float(m), 4),
+                            "signal": round(float(s), 4) if pd.notna(s) else 0,
+                            "histogram": round(float(h), 4) if pd.notna(h) else 0,
+                        })
+                result["macd"] = macd_data
+            except Exception:
+                pass
+
+        # --- Income statement (annual, last 4 years) ---
+        try:
+            inc = yf_ticker.income_stmt
+            if inc is not None and not inc.empty:
+                income_records = []
+                for col in sorted(inc.columns):
+                    year = col.strftime("%Y") if hasattr(col, "strftime") else str(col)[:4]
+                    income_records.append({
+                        "year": year,
+                        "revenue": _safe_num(inc.at["Total Revenue", col]) if "Total Revenue" in inc.index else 0,
+                        "net_income": _safe_num(inc.at["Net Income", col]) if "Net Income" in inc.index else 0,
+                        "gross_profit": _safe_num(inc.at["Gross Profit", col]) if "Gross Profit" in inc.index else 0,
+                    })
+                result["income"] = income_records
+        except Exception:
+            pass
+
+        # --- Balance sheet (annual, last 4 years) ---
+        try:
+            bs = yf_ticker.balance_sheet
+            if bs is not None and not bs.empty:
+                bs_records = []
+                for col in sorted(bs.columns):
+                    year = col.strftime("%Y") if hasattr(col, "strftime") else str(col)[:4]
+                    bs_records.append({
+                        "year": year,
+                        "total_assets": _safe_num(bs.at["Total Assets", col]) if "Total Assets" in bs.index else 0,
+                        "total_liabilities": _safe_num(bs.at["Total Liabilities Net Minority Interest", col]) if "Total Liabilities Net Minority Interest" in bs.index else 0,
+                        "equity": _safe_num(bs.at["Stockholders Equity", col]) if "Stockholders Equity" in bs.index else 0,
+                    })
+                result["balance_sheet"] = bs_records
+        except Exception:
+            pass
+
+        # --- Cash flow (annual, last 4 years) ---
+        try:
+            cf = yf_ticker.cashflow
+            if cf is not None and not cf.empty:
+                cf_records = []
+                for col in sorted(cf.columns):
+                    year = col.strftime("%Y") if hasattr(col, "strftime") else str(col)[:4]
+                    cf_records.append({
+                        "year": year,
+                        "operating": _safe_num(cf.at["Operating Cash Flow", col]) if "Operating Cash Flow" in cf.index else 0,
+                        "investing": _safe_num(cf.at["Investing Cash Flow", col]) if "Investing Cash Flow" in cf.index else 0,
+                        "financing": _safe_num(cf.at["Financing Cash Flow", col]) if "Financing Cash Flow" in cf.index else 0,
+                    })
+                result["cashflow"] = cf_records
+        except Exception:
+            pass
+
+        # --- Key ratios from info ---
+        try:
+            info = yf_ticker.info or {}
+            result["ratios"] = {
+                "roe": info.get("returnOnEquity"),
+                "roa": info.get("returnOnAssets"),
+                "debt_to_equity": info.get("debtToEquity"),
+                "current_ratio": info.get("currentRatio"),
+                "profit_margin": info.get("profitMargins"),
+                "pe_ratio": info.get("trailingPE"),
+            }
+        except Exception:
+            pass
+
+    except Exception as e:
+        return {"error": str(e)}
+
+    return result
+
+
 # ---------------------------------------------------------------------------
 # WebSocket — run analysis with real-time streaming
 # ---------------------------------------------------------------------------
@@ -198,7 +360,7 @@ async def websocket_analyze(ws: WebSocket):
 
         ticker = params["ticker"].strip().upper()
         analysis_date = params["date"]
-        selected_analysts = params.get("analysts", ["market", "social", "news", "fundamentals"])
+        selected_analysts = params.get("analysts", ["market", "financial_reports", "news", "fundamentals"])
         provider = params.get("provider", "openai")
         quick_model = params.get("quick_model", "gpt-5-mini")
         deep_model = params.get("deep_model", "gpt-5.4")
@@ -376,6 +538,15 @@ async def websocket_analyze(ws: WebSocket):
         # Build complete report
         complete_report = _build_report(report_sections, final_state, selected_analysts)
 
+        # Collect chart data
+        chart_data = {}
+        try:
+            chart_result = await get_chart_data(ticker, analysis_date)
+            if isinstance(chart_result, dict) and "error" not in chart_result:
+                chart_data = chart_result
+        except Exception:
+            pass
+
         await _send(ws, "complete", {
             "decision": decision,
             "agents": {k: {"status": v, "name": AGENT_DISPLAY_NAMES.get(k, k)} for k, v in agent_status.items()},
@@ -383,6 +554,7 @@ async def websocket_analyze(ws: WebSocket):
             "complete_report": complete_report,
             "ticker": ticker,
             "date": analysis_date,
+            "chart_data": chart_data,
         })
 
     except WebSocketDisconnect:
@@ -405,8 +577,8 @@ def _build_report(sections: dict, final_state: dict, selected_analysts: list) ->
     # Analyst reports
     if "market" in selected_analysts and sections.get("market_report"):
         report["market_report"] = {"title": "Phân tích Thị trường", "content": sections["market_report"]}
-    if "social" in selected_analysts and sections.get("sentiment_report"):
-        report["sentiment_report"] = {"title": "Tâm lý Mạng xã hội", "content": sections["sentiment_report"]}
+    if "financial_reports" in selected_analysts and sections.get("financial_reports_report"):
+        report["financial_reports_report"] = {"title": "Phân tích Báo cáo Tài chính", "content": sections["financial_reports_report"]}
     if "news" in selected_analysts and sections.get("news_report"):
         report["news_report"] = {"title": "Phân tích Tin tức", "content": sections["news_report"]}
     if "fundamentals" in selected_analysts and sections.get("fundamentals_report"):
