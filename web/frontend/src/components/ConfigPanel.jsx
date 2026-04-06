@@ -12,14 +12,14 @@ const DEFAULT_CONFIG = {
   ],
   analysts: [
     { id: 'market', name: 'Phân tích Thị trường', icon: '📈' },
-    { id: 'social', name: 'Phân tích Mạng xã hội', icon: '💬' },
+    { id: 'financial_reports', name: 'Phân tích Báo cáo Tài chính', icon: '📑' },
     { id: 'news', name: 'Phân tích Tin tức', icon: '📰' },
     { id: 'fundamentals', name: 'Phân tích Cơ bản', icon: '📊' },
   ],
   depth_options: [
-    { id: 1, name: 'Nông', desc: 'Nghiên cứu nhanh, ít vòng tranh luận' },
-    { id: 3, name: 'Trung bình', desc: 'Số vòng tranh luận vừa phải' },
-    { id: 5, name: 'Sâu', desc: 'Nghiên cứu toàn diện, tranh luận chuyên sâu' },
+    { id: 1, name: 'Thấp', desc: 'Nghiên cứu nhanh, ít vòng tranh luận' },
+    { id: 3, name: 'Cao', desc: 'Nghiên cứu kỹ lưỡng, nhiều vòng tranh luận' },
+    { id: 5, name: 'Chuyên sâu', desc: 'Nghiên cứu toàn diện, tranh luận chuyên sâu' },
   ],
 }
 
@@ -27,7 +27,7 @@ export default function ConfigPanel({ onStart }) {
   const [config, setConfig] = useState(null)
   const [ticker, setTicker] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [analysts, setAnalysts] = useState(['market', 'social', 'news', 'fundamentals'])
+  const [analysts, setAnalysts] = useState(['market', 'financial_reports', 'news', 'fundamentals'])
   const [depth, setDepth] = useState(1)
   const [provider, setProvider] = useState('openai')
   const [quickModel, setQuickModel] = useState('')

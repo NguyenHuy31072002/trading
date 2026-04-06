@@ -11,11 +11,11 @@ def create_trader(llm, memory):
         instrument_context = build_instrument_context(company_name)
         investment_plan = state["investment_plan"]
         market_research_report = state["market_report"]
-        sentiment_report = state["sentiment_report"]
+        financial_reports_report = state["financial_reports_report"]
         news_report = state["news_report"]
         fundamentals_report = state["fundamentals_report"]
 
-        curr_situation = f"{market_research_report}\n\n{sentiment_report}\n\n{news_report}\n\n{fundamentals_report}"
+        curr_situation = f"{market_research_report}\n\n{financial_reports_report}\n\n{news_report}\n\n{fundamentals_report}"
         past_memories = memory.get_memories(curr_situation, n_matches=2)
 
         past_memory_str = ""

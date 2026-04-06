@@ -5,6 +5,6 @@ from pydantic import BaseModel
 
 class AnalystType(str, Enum):
     MARKET = "market"
-    SOCIAL = "social"
+    FINANCIAL_REPORTS = "financial_reports"
     NEWS = "news"
     FUNDAMENTALS = "fundamentals"

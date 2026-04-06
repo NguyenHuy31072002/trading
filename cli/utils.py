@@ -11,7 +11,7 @@ TICKER_INPUT_EXAMPLES = "Ví dụ: SPY, VNM.VN, FPT.VN, 0700.HK"
 
 ANALYST_ORDER = [
     ("Phân tích Thị trường", AnalystType.MARKET),
-    ("Phân tích Mạng xã hội", AnalystType.SOCIAL),
+    ("Phân tích Báo cáo Tài chính", AnalystType.FINANCIAL_REPORTS),
     ("Phân tích Tin tức", AnalystType.NEWS),
     ("Phân tích Cơ bản", AnalystType.FUNDAMENTALS),
 ]
@@ -106,9 +106,9 @@ def select_research_depth() -> int:
 
     # Define research depth options with their corresponding values
     DEPTH_OPTIONS = [
-        ("Nông - Nghiên cứu nhanh, ít vòng tranh luận và thảo luận chiến lược", 1),
-        ("Trung bình - Mức trung gian, số vòng tranh luận vừa phải", 3),
-        ("Sâu - Nghiên cứu toàn diện, tranh luận và thảo luận chiến lược chuyên sâu", 5),
+        ("Thấp - Nghiên cứu nhanh, ít vòng tranh luận và thảo luận chiến lược", 1),
+        ("Cao - Nghiên cứu kỹ lưỡng, nhiều vòng tranh luận và thảo luận chiến lược", 3),
+        ("Chuyên sâu - Nghiên cứu toàn diện, tranh luận và thảo luận chiến lược chuyên sâu", 5),
     ]
 
     choice = questionary.select(

@@ -49,7 +49,7 @@ class Propagator:
             ),
             "market_report": "",
             "fundamentals_report": "",
-            "sentiment_report": "",
+            "financial_reports_report": "",
             "news_report": "",
         }
 

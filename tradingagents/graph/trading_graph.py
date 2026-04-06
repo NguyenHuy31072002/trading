@@ -45,7 +45,7 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        selected_analysts=["market", "social", "news", "fundamentals"],
+        selected_analysts=["market", "financial_reports", "news", "fundamentals"],
         debug=False,
         config: Dict[str, Any] = None,
         callbacks: Optional[List] = None,
@@ -166,10 +166,13 @@ class TradingAgentsGraph:
                     get_indicators,
                 ]
             ),
-            "social": ToolNode(
+            "financial_reports": ToolNode(
                 [
-                    # News tools for social media analysis
-                    get_news,
+                    # Financial reports analysis tools
+                    get_fundamentals,
+                    get_balance_sheet,
+                    get_cashflow,
+                    get_income_statement,
                 ]
             ),
             "news": ToolNode(
@@ -232,7 +235,7 @@ class TradingAgentsGraph:
             "company_of_interest": final_state["company_of_interest"],
             "trade_date": final_state["trade_date"],
             "market_report": final_state["market_report"],
-            "sentiment_report": final_state["sentiment_report"],
+            "financial_reports_report": final_state["financial_reports_report"],
             "news_report": final_state["news_report"],
             "fundamentals_report": final_state["fundamentals_report"],
             "investment_debate_state": {

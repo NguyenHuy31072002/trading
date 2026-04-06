@@ -4,12 +4,12 @@ import remarkGfm from 'remark-gfm'
 import {
   TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare,
   Newspaper, PieChart, Users, Briefcase, Shield, Award,
-  ChevronDown, ChevronUp, RefreshCcw, FileText, Loader2
+  ChevronDown, ChevronUp, RefreshCcw, FileText
 } from 'lucide-react'
 import MarketCharts from './charts/MarketCharts'
 import FinancialReportsCharts from './charts/FinancialReportsCharts'
 import FundamentalsCharts from './charts/FundamentalsCharts'
-import { exportReportToPdf } from '../utils/exportPdf'
+import { exportStructuredReportToHtml } from '../utils/exportHtml'
 
 const SECTION_META = {
   market_report: { icon: BarChart3, color: 'blue', label: 'Phân tích Thị trường' },
@@ -106,7 +106,7 @@ export default function ResultsView({ data, onNewAnalysis }) {
   const { decision, complete_report, ticker, date } = data
   const sections = complete_report || {}
   const [chartData, setChartData] = useState(null)
-  const [exporting, setExporting] = useState(false)
+
 
   useEffect(() => {
     // Use chart_data from WebSocket response if available
@@ -122,13 +122,8 @@ export default function ResultsView({ data, onNewAnalysis }) {
       .catch(() => setChartData(null))
   }, [ticker, date, data.chart_data])
 
-  const handleExportPdf = async () => {
-    setExporting(true)
-    try {
-      await exportReportToPdf('report-content', ticker, date)
-    } finally {
-      setExporting(false)
-    }
+  const handleExportHtml = () => {
+    exportStructuredReportToHtml(sections, ticker, date, decision, chartData)
   }
 
   // Map section keys to their chart data subsets
@@ -171,12 +166,11 @@ export default function ResultsView({ data, onNewAnalysis }) {
           Phân tích mới
         </button>
         <button
-          onClick={handleExportPdf}
-          disabled={exporting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition cursor-pointer disabled:opacity-50"
+          onClick={handleExportHtml}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition cursor-pointer"
         >
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-          {exporting ? 'Đang xuất...' : 'Tải PDF'}
+          <FileText className="w-4 h-4" />
+          Tải báo cáo
         </button>
       </div>
     </div>

@@ -52,7 +52,7 @@ class MessageBuffer:
     # Analyst name mapping
     ANALYST_MAPPING = {
         "market": "Market Analyst",
-        "social": "Social Analyst",
+        "financial_reports": "Financial_reports Analyst",
         "news": "News Analyst",
         "fundamentals": "Fundamentals Analyst",
     }
@@ -62,7 +62,7 @@ class MessageBuffer:
     # finalizing_agent: which agent must be "completed" for this report to count as done
     REPORT_SECTIONS = {
         "market_report": ("market", "Market Analyst"),
-        "sentiment_report": ("social", "Social Analyst"),
+        "financial_reports_report": ("financial_reports", "Financial_reports Analyst"),
         "news_report": ("news", "News Analyst"),
         "fundamentals_report": ("fundamentals", "Fundamentals Analyst"),
         "investment_plan": (None, "Research Manager"),
@@ -170,7 +170,7 @@ class MessageBuffer:
             # Format the current section for display
             section_titles = {
                 "market_report": "Phân tích Thị trường",
-                "sentiment_report": "Tâm lý Mạng xã hội",
+                "financial_reports_report": "Phân tích Báo cáo Tài chính",
                 "news_report": "Phân tích Tin tức",
                 "fundamentals_report": "Phân tích Cơ bản",
                 "investment_plan": "Quyết định Đội Nghiên cứu",
@@ -188,16 +188,16 @@ class MessageBuffer:
         report_parts = []
 
         # Analyst Team Reports - use .get() to handle missing sections
-        analyst_sections = ["market_report", "sentiment_report", "news_report", "fundamentals_report"]
+        analyst_sections = ["market_report", "financial_reports_report", "news_report", "fundamentals_report"]
         if any(self.report_sections.get(section) for section in analyst_sections):
             report_parts.append("## Báo cáo Đội Phân tích")
             if self.report_sections.get("market_report"):
                 report_parts.append(
                     f"### Phân tích Thị trường\n{self.report_sections['market_report']}"
                 )
-            if self.report_sections.get("sentiment_report"):
+            if self.report_sections.get("financial_reports_report"):
                 report_parts.append(
-                    f"### Tâm lý Mạng xã hội\n{self.report_sections['sentiment_report']}"
+                    f"### Phân tích Báo cáo Tài chính\n{self.report_sections['financial_reports_report']}"
                 )
             if self.report_sections.get("news_report"):
                 report_parts.append(
@@ -617,10 +617,10 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
         analysts_dir.mkdir(exist_ok=True)
         (analysts_dir / "market.md").write_text(final_state["market_report"])
         analyst_parts.append(("Market Analyst", final_state["market_report"]))
-    if final_state.get("sentiment_report"):
+    if final_state.get("financial_reports_report"):
         analysts_dir.mkdir(exist_ok=True)
-        (analysts_dir / "sentiment.md").write_text(final_state["sentiment_report"])
-        analyst_parts.append(("Social Analyst", final_state["sentiment_report"]))
+        (analysts_dir / "financial_reports.md").write_text(final_state["financial_reports_report"])
+        analyst_parts.append(("Financial Reports Analyst", final_state["financial_reports_report"]))
     if final_state.get("news_report"):
         analysts_dir.mkdir(exist_ok=True)
         (analysts_dir / "news.md").write_text(final_state["news_report"])
@@ -704,8 +704,8 @@ def display_complete_report(final_state):
     analysts = []
     if final_state.get("market_report"):
         analysts.append(("Market Analyst", final_state["market_report"]))
-    if final_state.get("sentiment_report"):
-        analysts.append(("Social Analyst", final_state["sentiment_report"]))
+    if final_state.get("financial_reports_report"):
+        analysts.append(("Financial Reports Analyst", final_state["financial_reports_report"]))
     if final_state.get("news_report"):
         analysts.append(("News Analyst", final_state["news_report"]))
     if final_state.get("fundamentals_report"):
@@ -764,16 +764,16 @@ def update_research_team_status(status):
 
 
 # Ordered list of analysts for status transitions
-ANALYST_ORDER = ["market", "social", "news", "fundamentals"]
+ANALYST_ORDER = ["market", "financial_reports", "news", "fundamentals"]
 ANALYST_AGENT_NAMES = {
     "market": "Market Analyst",
-    "social": "Social Analyst",
+    "financial_reports": "Financial_reports Analyst",
     "news": "News Analyst",
     "fundamentals": "Fundamentals Analyst",
 }
 ANALYST_REPORT_MAP = {
     "market": "market_report",
-    "social": "sentiment_report",
+    "financial_reports": "financial_reports_report",
     "news": "news_report",
     "fundamentals": "fundamentals_report",
 }

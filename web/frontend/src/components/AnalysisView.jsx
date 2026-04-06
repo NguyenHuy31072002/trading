@@ -4,7 +4,7 @@ const TEAMS = [
   {
     name: 'Đội Phân tích',
     color: 'blue',
-    agents: ['Market Analyst', 'Social Analyst', 'News Analyst', 'Fundamentals Analyst'],
+    agents: ['Market Analyst', 'Financial_reports Analyst', 'News Analyst', 'Fundamentals Analyst'],
   },
   {
     name: 'Đội Nghiên cứu',
