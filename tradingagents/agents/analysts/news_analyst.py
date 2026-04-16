@@ -5,6 +5,7 @@ from tradingagents.agents.utils.agent_utils import (
     build_instrument_context,
     get_global_news,
     get_news,
+    search_web,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -17,12 +18,16 @@ def create_news_analyst(llm):
         tools = [
             get_news,
             get_global_news,
+            search_web,
         ]
 
         system_message = (
-            "You are a news researcher tasked with analyzing recent news and trends over the past week. Please write a comprehensive report of the current state of the world that is relevant for trading and macroeconomics. Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, and get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."
-            + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
-            + """ IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt)."""
+            "You are a news researcher tasked with analyzing recent news and trends over the past week. Please write a comprehensive report of the current state of the world that is relevant for trading and macroeconomics. "
+            "Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news, and search_web(query) to search the internet for the latest real-time information about the company, its competitors, industry trends, regulatory changes, or any relevant topic. "
+            "IMPORTANT: You MUST use search_web to research the company on the internet before writing your report. Search for recent news, earnings, analyst opinions, and any significant events. "
+            "Provide specific, actionable insights with supporting evidence to help traders make informed decisions."
+            " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
+            " IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt)."
         )
 
         prompt = ChatPromptTemplate.from_messages(
