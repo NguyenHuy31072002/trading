@@ -34,7 +34,7 @@ export default function ConfigPanel({ onStart }) {
   const [deepModel, setDeepModel] = useState('')
 
   useEffect(() => {
-    fetch('/api/config')
+    fetch(`${import.meta.env.BASE_URL}api/config`)
       .then(r => r.json())
       .then(data => {
         setConfig(data)

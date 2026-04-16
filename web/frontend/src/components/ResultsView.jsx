@@ -116,7 +116,7 @@ export default function ResultsView({ data, onNewAnalysis }) {
     }
     // Fallback: fetch from REST endpoint
     if (!ticker) return
-    fetch(`/api/chart-data/${encodeURIComponent(ticker)}?date=${encodeURIComponent(date)}`)
+    fetch(`${import.meta.env.BASE_URL}api/chart-data/${encodeURIComponent(ticker)}?date=${encodeURIComponent(date)}`)
       .then(r => r.json())
       .then(setChartData)
       .catch(() => setChartData(null))
