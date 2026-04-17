@@ -22,6 +22,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
+from .history import router as history_router, save_result as save_history_result
 
 
 # ---------------------------------------------------------------------------
@@ -177,6 +178,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(history_router)
 
 
 # ---------------------------------------------------------------------------
@@ -547,7 +550,8 @@ async def websocket_analyze(ws: WebSocket):
         except Exception:
             pass
 
-        await _send(ws, "complete", {
+        # Persist to server-side history
+        complete_data = {
             "decision": decision,
             "agents": {k: {"status": v, "name": AGENT_DISPLAY_NAMES.get(k, k)} for k, v in agent_status.items()},
             "reports": report_sections,
@@ -555,6 +559,12 @@ async def websocket_analyze(ws: WebSocket):
             "ticker": ticker,
             "date": analysis_date,
             "chart_data": chart_data,
+        }
+        saved_entry = save_history_result(complete_data)
+
+        await _send(ws, "complete", {
+            **complete_data,
+            "history_entry": saved_entry,
         })
 
     except WebSocketDisconnect:

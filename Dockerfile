@@ -19,8 +19,14 @@ COPY web/backend/requirements.txt web/backend/requirements.txt
 RUN pip install --no-cache-dir . && \
     pip install --no-cache-dir -r web/backend/requirements.txt
 
+# Copy web package init files
+COPY web/__init__.py web/__init__.py
+
 # Copy backend
 COPY web/backend/ web/backend/
+
+# Create history volume mount point
+RUN mkdir -p web/backend/history
 
 # Copy built frontend
 COPY --from=frontend-build /app/web/frontend/dist web/frontend/dist

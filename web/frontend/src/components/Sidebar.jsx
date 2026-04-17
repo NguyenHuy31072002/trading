@@ -4,12 +4,12 @@ import { History, Trash2, X, ChevronLeft, ChevronRight, TrendingUp, TrendingDown
 function decisionInfo(decision) {
   const d = (decision || '').toUpperCase()
   if (d.includes('BUY') || d.includes('OVERWEIGHT')) {
-    return { icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10' }
+    return { icon: TrendingUp, color: 'text-buy', bg: 'bg-buy-bg' }
   }
   if (d.includes('SELL') || d.includes('UNDERWEIGHT')) {
-    return { icon: TrendingDown, color: 'text-red-400', bg: 'bg-red-500/10' }
+    return { icon: TrendingDown, color: 'text-sell', bg: 'bg-sell-bg' }
   }
-  return { icon: Minus, color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  return { icon: Minus, color: 'text-hold', bg: 'bg-hold-bg' }
 }
 
 function formatTime(ts) {
@@ -31,50 +31,51 @@ export default function Sidebar({ history, selectedId, onSelect, onDelete, onCle
 
   return (
     <aside
-      className={`${collapsed ? 'w-14' : 'w-72'} shrink-0 border-r border-slate-800 bg-[#0d1220]/60 transition-all duration-200 flex flex-col sticky top-[73px] h-[calc(100vh-73px)]`}
+      className={`${collapsed ? 'w-12' : 'w-64'} shrink-0 border-r border-border-subtle bg-bg-secondary transition-[width] duration-200 flex flex-col sticky top-14 h-[calc(100vh-3.5rem)]`}
     >
-      <div className="flex items-center justify-between px-3 py-3 border-b border-slate-800">
+      <div className="flex items-center justify-between h-11 px-3 border-b border-border-subtle">
         {!collapsed && (
-          <div className="flex items-center gap-2 text-slate-300">
-            <History className="w-4 h-4" />
-            <span className="text-sm font-semibold">Lịch sử</span>
-            <span className="text-xs text-slate-500">({history.length})</span>
+          <div className="flex items-center gap-1.5 text-text-primary">
+            <History className="w-3.5 h-3.5 text-text-tertiary" strokeWidth={1.75} />
+            <span className="text-[13px] font-medium">Lịch sử</span>
+            <span className="text-[11px] text-text-tertiary tabular-nums">({history.length})</span>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
+          className="w-6 h-6 rounded-sm flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary transition cursor-pointer"
           title={collapsed ? 'Mở rộng' : 'Thu gọn'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
         </button>
       </div>
 
       {collapsed ? (
         <div className="flex-1 overflow-y-auto py-2 flex flex-col items-center gap-1">
           {history.slice(0, 20).map(item => {
-            const { icon: Icon, color, bg } = decisionInfo(item.decision)
+            const { icon: Icon, color } = decisionInfo(item.decision)
             const isSelected = item.id === selectedId
             return (
               <button
                 key={item.id}
                 onClick={() => onSelect(item)}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-semibold transition cursor-pointer ${
-                  isSelected ? 'bg-blue-500/20 ring-1 ring-blue-400' : `${bg} hover:bg-slate-800`
+                className={`w-8 h-8 rounded-sm flex items-center justify-center transition cursor-pointer ${
+                  isSelected ? 'bg-bg-tertiary' : 'hover:bg-bg-tertiary'
                 } ${color}`}
                 title={`${item.ticker} — ${item.date}`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             )
           })}
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+          <div className="flex-1 overflow-y-auto px-1.5 py-1.5">
             {history.length === 0 ? (
-              <div className="text-center text-xs text-slate-500 px-3 py-8">
-                Chưa có phân tích nào.<br />Bắt đầu phân tích để xem lịch sử tại đây.
+              <div className="text-center text-[12px] text-text-tertiary px-3 py-6 leading-relaxed">
+                Chưa có phân tích nào.<br />
+                Chạy phân tích đầu tiên để thấy ở đây.
               </div>
             ) : (
               history.map(item => {
@@ -84,29 +85,27 @@ export default function Sidebar({ history, selectedId, onSelect, onDelete, onCle
                   <div
                     key={item.id}
                     onClick={() => onSelect(item)}
-                    className={`group relative px-3 py-2.5 rounded-lg cursor-pointer transition ${
+                    className={`group relative flex items-start gap-2 px-2.5 py-2 rounded-sm cursor-pointer transition ${
                       isSelected
-                        ? 'bg-blue-500/15 ring-1 ring-blue-400/50'
-                        : 'hover:bg-slate-800/60'
+                        ? 'bg-bg-tertiary'
+                        : 'hover:bg-bg-tertiary'
                     }`}
                   >
-                    <div className="flex items-start gap-2">
-                      <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${color}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-slate-100 truncate">{item.ticker}</span>
-                          <span className="text-[11px] text-slate-500">{item.date}</span>
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">{formatTime(item.timestamp)}</div>
+                    <Icon className={`w-3.5 h-3.5 mt-[3px] shrink-0 ${color}`} strokeWidth={2} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[13px] font-medium text-text-primary truncate tracking-tight">{item.ticker}</span>
+                        <span className="text-[11px] text-text-tertiary tabular-nums">{item.date}</span>
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(item.id) }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-slate-500 hover:text-red-400 transition cursor-pointer"
-                        title="Xoá"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="text-[11px] text-text-tertiary mt-0.5">{formatTime(item.timestamp)}</div>
                     </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDelete(item.id) }}
+                      className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-sm flex items-center justify-center text-text-tertiary hover:text-sell hover:bg-sell-bg transition cursor-pointer"
+                      title="Xoá"
+                    >
+                      <X className="w-3 h-3" strokeWidth={2} />
+                    </button>
                   </div>
                 )
               })
@@ -114,18 +113,18 @@ export default function Sidebar({ history, selectedId, onSelect, onDelete, onCle
           </div>
 
           {history.length > 0 && (
-            <div className="border-t border-slate-800 p-2">
+            <div className="border-t border-border-subtle p-1.5">
               {confirmClear ? (
                 <div className="flex gap-1">
                   <button
                     onClick={() => { onClear(); setConfirmClear(false) }}
-                    className="flex-1 text-xs py-1.5 rounded bg-red-500/20 text-red-300 hover:bg-red-500/30 cursor-pointer"
+                    className="flex-1 h-7 text-[11px] rounded-sm bg-sell-bg text-sell hover:opacity-80 transition cursor-pointer"
                   >
                     Xác nhận xoá
                   </button>
                   <button
                     onClick={() => setConfirmClear(false)}
-                    className="flex-1 text-xs py-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer"
+                    className="flex-1 h-7 text-[11px] rounded-sm bg-bg-tertiary text-text-secondary hover:text-text-primary transition cursor-pointer"
                   >
                     Huỷ
                   </button>
@@ -133,10 +132,10 @@ export default function Sidebar({ history, selectedId, onSelect, onDelete, onCle
               ) : (
                 <button
                   onClick={() => setConfirmClear(true)}
-                  className="w-full flex items-center justify-center gap-2 text-xs py-1.5 rounded text-slate-400 hover:bg-slate-800 hover:text-red-400 transition cursor-pointer"
+                  className="w-full flex items-center justify-center gap-1.5 h-7 text-[11px] rounded-sm text-text-tertiary hover:bg-bg-tertiary hover:text-sell transition cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Xoá toàn bộ lịch sử
+                  <Trash2 className="w-3 h-3" strokeWidth={1.75} />
+                  Xoá toàn bộ
                 </button>
               )}
             </div>

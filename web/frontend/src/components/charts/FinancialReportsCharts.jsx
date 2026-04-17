@@ -1,7 +1,8 @@
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend
+  CartesianGrid, Tooltip, Legend,
 } from 'recharts'
+import { useChartTheme } from '../../utils/theme'
 
 function formatBillion(val) {
   if (val === 0) return '0'
@@ -13,35 +14,35 @@ function formatBillion(val) {
 
 function ChartWrapper({ title, children }) {
   return (
-    <div className="mt-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
-      <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{title}</h4>
+    <div className="mt-3 p-3 bg-bg-secondary rounded-md border border-border-subtle">
+      <h4 className="text-[10px] font-medium tracking-[0.08em] uppercase text-text-tertiary mb-2">{title}</h4>
       {children}
     </div>
   )
 }
 
 export default function FinancialReportsCharts({ chartData }) {
+  const t = useChartTheme()
   if (!chartData) return null
 
   const { income, cashflow } = chartData
+  const tooltipStyle = { backgroundColor: t.tooltipBg, border: `1px solid ${t.tooltipBorder}`, borderRadius: '6px', fontSize: '12px', color: t.tooltipText }
+  const labelStyle = { color: t.text }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {income && income.length > 0 && (
         <ChartWrapper title="Doanh thu & Lợi nhuận (4 năm)">
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={income}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="year" stroke="#94a3b8" fontSize={12} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={formatBillion} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                formatter={(val) => formatBillion(val)}
-              />
-              <Legend />
-              <Bar dataKey="revenue" fill="#3b82f6" name="Doanh thu" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="gross_profit" fill="#22c55e" name="Lợi nhuận gộp" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="net_income" fill="#f59e0b" name="Lợi nhuận ròng" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="2 4" stroke={t.grid} />
+              <XAxis dataKey="year" stroke={t.axis} fontSize={12} />
+              <YAxis stroke={t.axis} fontSize={11} tickFormatter={formatBillion} />
+              <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} formatter={(val) => formatBillion(val)} />
+              <Legend wrapperStyle={{ fontSize: '12px', color: t.text }} />
+              <Bar dataKey="revenue" fill={t.info} name="Doanh thu" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="gross_profit" fill={t.buy} name="Lợi nhuận gộp" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="net_income" fill={t.hold} name="Lợi nhuận ròng" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartWrapper>
@@ -49,19 +50,16 @@ export default function FinancialReportsCharts({ chartData }) {
 
       {cashflow && cashflow.length > 0 && (
         <ChartWrapper title="Dòng tiền (4 năm)">
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={cashflow}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="year" stroke="#94a3b8" fontSize={12} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={formatBillion} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                formatter={(val) => formatBillion(val)}
-              />
-              <Legend />
-              <Bar dataKey="operating" fill="#3b82f6" name="Hoạt động KD" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="investing" fill="#ef4444" name="Đầu tư" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="financing" fill="#8b5cf6" name="Tài chính" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="2 4" stroke={t.grid} />
+              <XAxis dataKey="year" stroke={t.axis} fontSize={12} />
+              <YAxis stroke={t.axis} fontSize={11} tickFormatter={formatBillion} />
+              <Tooltip contentStyle={tooltipStyle} labelStyle={labelStyle} formatter={(val) => formatBillion(val)} />
+              <Legend wrapperStyle={{ fontSize: '12px', color: t.text }} />
+              <Bar dataKey="operating" fill={t.info} name="Hoạt động KD" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="investing" fill={t.sell} name="Đầu tư" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="financing" fill={t.financial} name="Tài chính" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartWrapper>

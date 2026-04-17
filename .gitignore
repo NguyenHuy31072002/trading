@@ -224,3 +224,6 @@ __marimo__/
 
 # Cache
 **/data_cache/
+
+# Server-side history data
+web/backend/history/

@@ -111,7 +111,7 @@ export async function exportReportToPdf(elementId, ticker, date) {
       pdf.text(`Report: ${ticker} — ${date}`, 10, 20)
       pdf.text('PDF export encountered an error. Please try again.', 10, 30)
       pdf.save(`${ticker}_${date}_report.pdf`)
-    } catch (e2) {
+    } catch {
       alert('Không thể xuất PDF. Vui lòng thử lại.')
     }
   } finally {
