@@ -106,6 +106,63 @@ DEPTH_OPTIONS = [
     {"id": 5, "name": "Chuyên sâu", "desc": "Nghiên cứu toàn diện, tranh luận chuyên sâu"},
 ]
 
+# Model pricing — $/1M tokens (input, output). Ballpark published prices.
+# Update here when provider prices change.
+MODEL_PRICING = {
+    # OpenAI
+    "gpt-5-nano": (0.05, 0.40),
+    "gpt-5-mini": (0.25, 2.00),
+    "gpt-5.2": (0.80, 6.00),
+    "gpt-5.4": (1.25, 10.00),
+    "gpt-4.1": (2.00, 8.00),
+    # Anthropic
+    "claude-haiku-4-5": (1.00, 5.00),
+    "claude-sonnet-4-5": (3.00, 15.00),
+    "claude-sonnet-4-6": (3.00, 15.00),
+    "claude-opus-4-6": (15.00, 75.00),
+    # Google
+    "gemini-2.5-flash": (0.075, 0.30),
+    "gemini-3-flash-preview": (0.10, 0.40),
+    "gemini-2.5-pro": (1.25, 10.00),
+    "gemini-3.1-pro-preview": (1.25, 10.00),
+    # xAI
+    "grok-4-fast-non-reasoning": (0.20, 0.50),
+    "grok-4-1-fast-non-reasoning": (0.20, 0.50),
+    "grok-4-1-fast-reasoning": (0.60, 2.00),
+    "grok-4-0709": (3.00, 15.00),
+    # OpenRouter free tiers
+    "nvidia/nemotron-3-nano-30b-a3b:free": (0.00, 0.00),
+    "z-ai/glm-4.5-air:free": (0.00, 0.00),
+    # Ollama local
+    "qwen3:latest": (0.00, 0.00),
+    "glm-4.7-flash:latest": (0.00, 0.00),
+}
+
+# Rough profile for cost estimation shown in the UI.
+ANALYSIS_COST_PROFILE = {
+    "input_tokens_per_call": 2500,
+    "output_tokens_per_call": 1500,
+    # deep = Research Manager + Trader + Portfolio Manager
+    "deep_calls": 3,
+    # quick = N analysts + 2 × depth (Bull+Bear) + 3 × depth (Risk debators)
+    "quick_calls_formula": "num_analysts + 5 * depth",
+}
+
+
+def _attach_pricing(models_by_provider):
+    """Return a copy with input_price/output_price on each model entry."""
+    out = {}
+    for provider, models in models_by_provider.items():
+        out[provider] = []
+        for m in models:
+            price = MODEL_PRICING.get(m["id"])
+            out[provider].append({
+                **m,
+                "input_price": price[0] if price else None,
+                "output_price": price[1] if price else None,
+            })
+    return out
+
 
 # ---------------------------------------------------------------------------
 # Agent status constants
@@ -191,10 +248,11 @@ async def get_config():
     """Return all configuration options for the frontend."""
     return {
         "providers": LLM_PROVIDERS,
-        "quick_models": QUICK_MODELS,
-        "deep_models": DEEP_MODELS,
+        "quick_models": _attach_pricing(QUICK_MODELS),
+        "deep_models": _attach_pricing(DEEP_MODELS),
         "analysts": ANALYSTS,
         "depth_options": DEPTH_OPTIONS,
+        "cost_profile": ANALYSIS_COST_PROFILE,
     }
 
 

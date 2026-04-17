@@ -135,8 +135,35 @@ export default function ConfigPanel({ onStart }) {
 
   const cfg = config || DEFAULT_CONFIG
   const depthEstimate = depth === 1 ? '~3 phút' : depth === 3 ? '~6 phút' : '~10 phút'
-  const tokenEstimate = depth === 1 ? '~12k' : depth === 3 ? '~28k' : '~55k'
-  const costEstimate = depth === 1 ? '~$0.04' : depth === 3 ? '~$0.10' : '~$0.20'
+
+  const costProfile = config?.cost_profile || {
+    input_tokens_per_call: 2500,
+    output_tokens_per_call: 1500,
+    deep_calls: 3,
+  }
+  const quickInfo = (config?.quick_models?.[provider] || []).find(m => m.id === quickModel)
+  const deepInfo = (config?.deep_models?.[provider] || []).find(m => m.id === deepModel)
+
+  const quickCalls = analysts.length + 5 * depth
+  const deepCalls = costProfile.deep_calls
+  const inTok = costProfile.input_tokens_per_call
+  const outTok = costProfile.output_tokens_per_call
+  const totalTokens = (quickCalls + deepCalls) * (inTok + outTok)
+  const tokenEstimate = totalTokens >= 1000 ? `~${Math.round(totalTokens / 1000)}k` : `~${totalTokens}`
+
+  const costDollar = (() => {
+    if (!quickInfo || !deepInfo) return null
+    const qIn = quickInfo.input_price, qOut = quickInfo.output_price
+    const dIn = deepInfo.input_price, dOut = deepInfo.output_price
+    if ([qIn, qOut, dIn, dOut].some(v => v == null)) return null
+    const quickCost = quickCalls * (inTok * qIn + outTok * qOut) / 1e6
+    const deepCost = deepCalls * (inTok * dIn + outTok * dOut) / 1e6
+    return quickCost + deepCost
+  })()
+  const costEstimate = costDollar == null ? '—' :
+    costDollar === 0 ? 'Miễn phí' :
+    costDollar < 0.01 ? '<$0.01' :
+    `~$${costDollar.toFixed(costDollar < 1 ? 2 : costDollar < 10 ? 2 : 1)}`
 
   const valid = ticker.trim() && analysts.length > 0
 
@@ -262,7 +289,10 @@ export default function ConfigPanel({ onStart }) {
           <SectionLabel step="06" title="Mô hình" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="border border-border-subtle rounded-md p-2.5">
-              <div className="text-[11px] font-medium text-text-tertiary mb-1">Tư duy nhanh</div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-medium text-text-tertiary">Tư duy nhanh</span>
+                <PricePill price={quickInfo} />
+              </div>
               <select
                 value={quickModel}
                 onChange={e => setQuickModel(e.target.value)}
@@ -274,7 +304,10 @@ export default function ConfigPanel({ onStart }) {
               </select>
             </div>
             <div className="border border-border-subtle rounded-md p-2.5">
-              <div className="text-[11px] font-medium text-text-tertiary mb-1">Tư duy sâu</div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-medium text-text-tertiary">Tư duy sâu</span>
+                <PricePill price={deepInfo} />
+              </div>
               <select
                 value={deepModel}
                 onChange={e => setDeepModel(e.target.value)}
@@ -285,6 +318,9 @@ export default function ConfigPanel({ onStart }) {
                 ))}
               </select>
             </div>
+          </div>
+          <div className="mt-2 text-[10px] text-text-tertiary">
+            Giá chỉ mang tính tham khảo theo bảng giá công bố. Chi phí thực có thể khác do số token input/output thực tế.
           </div>
         </FieldCard>
 
@@ -322,4 +358,19 @@ function Metric({ label, value }) {
 
 function Divider() {
   return <span className="w-px h-6 bg-border-subtle" />
+}
+
+function PricePill({ price }) {
+  if (!price || price.input_price == null || price.output_price == null) {
+    return <span className="text-[10px] text-text-tertiary tabular-nums">—</span>
+  }
+  if (price.input_price === 0 && price.output_price === 0) {
+    return <span className="text-[10px] font-medium text-buy tabular-nums">Free</span>
+  }
+  const fmt = (v) => v < 1 ? `$${v.toFixed(2)}` : `$${v.toFixed(1)}`
+  return (
+    <span className="text-[10px] text-text-tertiary tabular-nums" title={`Input ${fmt(price.input_price)}/1M · Output ${fmt(price.output_price)}/1M`}>
+      {fmt(price.input_price)} / {fmt(price.output_price)} <span className="opacity-60">/1M</span>
+    </span>
+  )
 }
