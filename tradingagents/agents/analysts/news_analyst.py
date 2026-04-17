@@ -26,8 +26,15 @@ def create_news_analyst(llm):
             "Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news, and search_web(query) to search the internet for the latest real-time information about the company, its competitors, industry trends, regulatory changes, or any relevant topic. "
             "IMPORTANT: You MUST use search_web to research the company on the internet before writing your report. Search for recent news, earnings, analyst opinions, and any significant events. "
             "Provide specific, actionable insights with supporting evidence to help traders make informed decisions."
-            " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
-            " IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt)."
+            "\n\n"
+            "CITATION REQUIREMENTS — MANDATORY:\n"
+            "1. Every factual claim, statistic, quote, or news event you mention MUST be attributed to its source.\n"
+            "2. When the tool output includes a publisher name and a URL (Link/URL field), you MUST include both inline in your prose, formatted as: [Tên nguồn](URL) — e.g., 'Theo [Reuters](https://reuters.com/article/xyz), giá cổ phiếu đã tăng 5%...'. If no URL is available, still cite the publisher name.\n"
+            "3. Never fabricate URLs or sources. If a tool did not return a URL for a piece of information, omit the link but keep the publisher name.\n"
+            "4. At the END of the report, you MUST add a section titled '## Nguồn tham khảo' containing a numbered list of every unique source actually used, formatted as: '1. Tên nguồn — [tiêu đề bài](URL) — ngày đăng (nếu có)'.\n"
+            "5. The key-points markdown table at the end should also have a column named 'Nguồn' with the publisher name for each point.\n"
+            "\n"
+            "IMPORTANT: You MUST write your entire response in Vietnamese (tiếng Việt)."
         )
 
         prompt = ChatPromptTemplate.from_messages(
