@@ -151,6 +151,9 @@ def select_shallow_thinking_agent(provider) -> str:
             ("Claude Haiku 4.5 - Fast, near-instant responses", "claude-haiku-4-5"),
             ("Claude Sonnet 4.5 - Agents and coding", "claude-sonnet-4-5"),
         ],
+        "bedrock": [
+            ("Claude Sonnet 4.6 (Bedrock)", "us.anthropic.claude-sonnet-4-6"),
+        ],
         "google": [
             ("Gemini 3 Flash - Next-gen fast", "gemini-3-flash-preview"),
             ("Gemini 2.5 Flash - Balanced, stable", "gemini-2.5-flash"),
@@ -217,6 +220,12 @@ def select_deep_thinking_agent(provider) -> str:
             ("Claude Sonnet 4.6 - Best speed and intelligence balance", "claude-sonnet-4-6"),
             ("Claude Sonnet 4.5 - Agents and coding", "claude-sonnet-4-5"),
         ],
+        "bedrock": [
+            ("Claude Opus 4.7 (Bedrock)", "us.anthropic.claude-opus-4-7"),
+            ("Claude Opus 4.6 (Bedrock)", "us.anthropic.claude-opus-4-6-v1"),
+            ("Claude Opus 4.5 (Bedrock)", "us.anthropic.claude-opus-4-5-20251101-v1:0"),
+            ("Claude Sonnet 4.6 (Bedrock)", "us.anthropic.claude-sonnet-4-6"),
+        ],
         "google": [
             ("Gemini 3.1 Pro - Reasoning-first, complex workflows", "gemini-3.1-pro-preview"),
             ("Gemini 3 Flash - Next-gen fast", "gemini-3-flash-preview"),
@@ -269,6 +278,7 @@ def select_llm_provider() -> tuple[str, str]:
         ("OpenAI", "https://api.openai.com/v1"),
         ("Google", "https://generativelanguage.googleapis.com/v1"),
         ("Anthropic", "https://api.anthropic.com/"),
+        ("Bedrock", ""),
         ("xAI", "https://api.x.ai/v1"),
         ("Openrouter", "https://openrouter.ai/api/v1"),
         ("Ollama", "http://localhost:11434/v1"),

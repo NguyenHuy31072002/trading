@@ -7,6 +7,7 @@ const DEFAULT_CONFIG = {
   providers: [
     { id: 'openai', name: 'OpenAI' },
     { id: 'anthropic', name: 'Anthropic' },
+    { id: 'bedrock', name: 'AWS Bedrock' },
     { id: 'google', name: 'Google' },
     { id: 'xai', name: 'xAI' },
     { id: 'openrouter', name: 'OpenRouter' },

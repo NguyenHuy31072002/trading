@@ -33,6 +33,7 @@ LLM_PROVIDERS = [
     {"id": "openai", "name": "OpenAI", "url": "https://api.openai.com/v1"},
     {"id": "google", "name": "Google", "url": "https://generativelanguage.googleapis.com/v1"},
     {"id": "anthropic", "name": "Anthropic", "url": "https://api.anthropic.com/"},
+    {"id": "bedrock", "name": "AWS Bedrock", "url": ""},
     {"id": "xai", "name": "xAI", "url": "https://api.x.ai/v1"},
     {"id": "openrouter", "name": "OpenRouter", "url": "https://openrouter.ai/api/v1"},
     {"id": "ollama", "name": "Ollama (Local)", "url": "http://localhost:11434/v1"},
@@ -49,6 +50,9 @@ QUICK_MODELS = {
         {"id": "claude-sonnet-4-6", "name": "Claude Sonnet 4.6"},
         {"id": "claude-haiku-4-5", "name": "Claude Haiku 4.5"},
         {"id": "claude-sonnet-4-5", "name": "Claude Sonnet 4.5"},
+    ],
+    "bedrock": [
+        {"id": "us.anthropic.claude-sonnet-4-6", "name": "Claude Sonnet 4.6 (Bedrock)"},
     ],
     "google": [
         {"id": "gemini-3-flash-preview", "name": "Gemini 3 Flash"},
@@ -76,6 +80,12 @@ DEEP_MODELS = {
         {"id": "claude-opus-4-6", "name": "Claude Opus 4.6"},
         {"id": "claude-sonnet-4-6", "name": "Claude Sonnet 4.6"},
         {"id": "claude-sonnet-4-5", "name": "Claude Sonnet 4.5"},
+    ],
+    "bedrock": [
+        {"id": "us.anthropic.claude-opus-4-7", "name": "Claude Opus 4.7 (Bedrock)"},
+        {"id": "us.anthropic.claude-opus-4-6-v1", "name": "Claude Opus 4.6 (Bedrock)"},
+        {"id": "us.anthropic.claude-opus-4-5-20251101-v1:0", "name": "Claude Opus 4.5 (Bedrock)"},
+        {"id": "us.anthropic.claude-sonnet-4-6", "name": "Claude Sonnet 4.6 (Bedrock)"},
     ],
     "google": [
         {"id": "gemini-3.1-pro-preview", "name": "Gemini 3.1 Pro"},
@@ -120,6 +130,11 @@ MODEL_PRICING = {
     "claude-sonnet-4-5": (3.00, 15.00),
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-opus-4-6": (15.00, 75.00),
+    # AWS Bedrock (same per-token pricing as Anthropic API)
+    "us.anthropic.claude-sonnet-4-6": (3.00, 15.00),
+    "us.anthropic.claude-opus-4-5-20251101-v1:0": (15.00, 75.00),
+    "us.anthropic.claude-opus-4-6-v1": (15.00, 75.00),
+    "us.anthropic.claude-opus-4-7": (15.00, 75.00),
     # Google
     "gemini-2.5-flash": (0.075, 0.30),
     "gemini-3-flash-preview": (0.10, 0.40),
